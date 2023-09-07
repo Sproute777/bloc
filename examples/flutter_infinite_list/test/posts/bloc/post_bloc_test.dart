@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_infinite_list/posts/bloc/post_bloc.dart';
 import 'package:flutter_infinite_list/posts/models/post.dart';
+import 'package:flutter_infinite_list/posts/posts.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
@@ -57,8 +58,10 @@ void main() {
         },
         build: () => PostBloc(httpClient: httpClient),
         act: (bloc) => bloc.add(PostFetched()),
-        expect: () => const <PostState>[
-          PostState(status: PostStatus.success, posts: mockPosts)
+        expect: () => <PostState>[
+          PostState(status: PostStatus.success, segments: [
+            PostSegment(startIndex: mockPosts.first.id, posts: mockPosts),
+          ],)
         ],
         verify: (_) {
           verify(() => httpClient.get(_postsUrl(start: 0))).called(1);
@@ -80,7 +83,7 @@ void main() {
           ..add(PostFetched())
           ..add(PostFetched()),
         expect: () => const <PostState>[
-          PostState(status: PostStatus.success, posts: mockPosts)
+          PostState(status: PostStatus.success, segments: mockPosts)
         ],
         verify: (_) {
           verify(() => httpClient.get(any())).called(1);

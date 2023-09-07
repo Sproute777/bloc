@@ -10,14 +10,10 @@ part 'post_event.dart';
 part 'post_state.dart';
 
 const _postLimit = 20;
-const throttleDuration = Duration(milliseconds: 100);
-
-
 
 class PostBloc extends Bloc<PostEvent, PostState> {
   PostBloc({required this.httpClient}) : super(const PostState()) {
-    on<PostFetched>(
-      _onPostFetched);
+    on<PostFetched>(_onPostFetched);
   }
 
   final http.Client httpClient;
@@ -26,26 +22,33 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     PostFetched event,
     Emitter<PostState> emit,
   ) async {
-    if (state.hasReachedMax) return;
+    if (state.hasReachedEnd) return;
     try {
       if (state.status == PostStatus.initial) {
         final posts = await _fetchPosts();
         return emit(
           state.copyWith(
             status: PostStatus.success,
-            posts: posts,
-            hasReachedMax: false,
+            segments: [
+              PostSegment(posts: posts),
+            ],
+            hasReachedEnd: false,
           ),
         );
       }
-      final posts = await _fetchPosts(state.posts.length);
+      final posts = await _fetchPosts(state.countPosts);
       posts.isEmpty
-          ? emit(state.copyWith(hasReachedMax: true))
+          ? emit(state.copyWith(hasReachedEnd: true))
           : emit(
               state.copyWith(
                 status: PostStatus.success,
-                posts: List.of(state.posts)..addAll(posts),
-                hasReachedMax: false,
+                segments: List.of(state.segments)
+                  ..add(
+                    PostSegment(
+                      posts: posts,
+                    ),
+                  ),
+                hasReachedEnd: false,
               ),
             );
     } catch (_) {
