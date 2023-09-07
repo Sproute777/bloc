@@ -6,7 +6,7 @@ final class PostState extends Equatable {
   const PostState({
     this.status = PostStatus.initial,
     this.segments = const <PostSegment>[],
-    this.hasReachedStart = false,
+    this.hasReachedStart = true,
     this.hasReachedEnd = false,
   });
 
@@ -29,11 +29,6 @@ final class PostState extends Equatable {
     );
   }
 
-  int get countPosts =>
-      segments.fold<int>(
-        segments.first.lastId,
-        (count, nextSegment) => count + nextSegment.posts.length,
-      );
 
   @override
   String toString() {

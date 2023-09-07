@@ -24,17 +24,24 @@ class _PostsListState extends State<PostsList> {
             }
             return ListView.builder(
               itemBuilder: (BuildContext context, int index) {
-                return index < state.segments.length
-                    ? PostSegmentItem(segment: state.segments[index])
-                    : BottomLoader(
-                        callback: () => context.read<PostBloc>().add(
-                              PostFetched(),
-                            ),
-                      );
+                if (!state.hasReachedStart && index == 0) {
+                  return TopLoader(
+                    callback: () => context.read<PostBloc>().add(
+                          PostHeadFetched(),
+                        ),
+                  );
+                }
+                if (!state.hasReachedEnd && index >= state.segments.length) {
+                return  BottomLoader(
+                    callback: () => context.read<PostBloc>().add(
+                          PostTailFetched(),
+                        ),
+                  );
+                }
+                return PostSegmentItem(segment: state.segments[index - state.hasReachedStart.toInt]);
               },
-              itemCount: state.hasReachedEnd
-                  ? state.segments.length
-                  : state.segments.length + 1,
+              itemCount: state.segments.length +
+                  state.hasReachedStart.toInt + state.hasReachedEnd.toInt,
             );
           case PostStatus.initial:
             return const Center(child: CircularProgressIndicator());
@@ -42,4 +49,8 @@ class _PostsListState extends State<PostsList> {
       },
     );
   }
+}
+
+extension _BoolToInt on bool {
+  int get toInt => this ? 0 : 1;
 }

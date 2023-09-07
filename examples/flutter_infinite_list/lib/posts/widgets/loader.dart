@@ -1,7 +1,17 @@
 import 'package:flutter/material.dart';
 
-class BottomLoader extends StatelessWidget {
-  const BottomLoader({
+final class TopLoader extends Loader{
+  const TopLoader({required super.callback, super.key,});
+}
+
+
+final class BottomLoader extends Loader{
+  const BottomLoader({required super.callback, super.key,});
+}
+
+
+sealed class Loader extends StatelessWidget {
+  const Loader({
     required this.callback, super.key,
   });
   final VoidCallback callback;
